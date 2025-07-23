@@ -1,10 +1,11 @@
 package com.example.helppet.model
 
 data class Occurrence(
-    val name: String = "",
-    val type: String = "",
-    val address: String = "",
-    val description: String = "",
-    val contact: String = "",
-    val picsUrl: List<String> = emptyList()
+    var id: String? = null,
+    var name: String = "",
+    var type: String = "",
+    var address: String = "",
+    var description: String = "",
+    var contact: String = "",
+    var picsUrl: List<String> = emptyList()
 )

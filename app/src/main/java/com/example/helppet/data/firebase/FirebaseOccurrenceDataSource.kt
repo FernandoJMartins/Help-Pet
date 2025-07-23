@@ -1,3 +1,4 @@
+import android.util.Log
 import com.example.helppet.data.repository.IOccurrenceDataSource
 import com.example.helppet.model.Occurrence
 import com.google.firebase.firestore.FirebaseFirestore
@@ -9,6 +10,12 @@ class FirebaseOccurrenceDataSource : IOccurrenceDataSource{
     override fun saveOccurrence(occurrence: Occurrence) {
         db.collection("occurrences")
             .add(occurrence)
+            .addOnSuccessListener{
+                System.out.println("Salvo com ID: ${it.id}")
+            }
+        .addOnFailureListener { e ->
+            System.out.println(e)
+        };
     }
 
     override suspend fun getOccurrences(): List<Occurrence> {

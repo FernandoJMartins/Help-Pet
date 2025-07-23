@@ -1,7 +1,8 @@
 package com.example.helppet
 
+import HomeScreen
 import ListReportsScreen
-import NewReportScreen
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,7 +29,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import com.example.helppet.ui.components.BottomNavigationBar
-import com.example.helppet.ui.screens.HomeScreen
+import com.example.helppet.ui.screens.NewReportScreen
 import com.example.helppet.ui.screens.ProfileScreen
 
 class MainActivity : ComponentActivity() {
