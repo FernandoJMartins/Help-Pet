@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889865174143",
+    "project_id": "helppet-18262",
+    "storage_bucket": "helppet-18262.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889865174143:android:9919fa6e0e1e43f7a0d34a",
+        "android_client_info": {
+          "package_name": "com.example.helppet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6ns5kEfbCaYKw3pnu6ezlsck-GEBBY_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
