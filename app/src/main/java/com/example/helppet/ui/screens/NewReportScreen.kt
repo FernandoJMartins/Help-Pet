@@ -43,21 +43,31 @@ import androidx.activity.result.contract.ActivityResultContracts.PickMultipleVis
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 import com.google.firebase.Firebase
 
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
+import androidx.compose.material.icons.filled.CameraAlt
 
+import androidx.compose.ui.draw.clip
 
-suspend fun handleImgUpload(context: Context, fotos: List<Uri>): List<String> {
+import java.util.UUID
+
+suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
     val storage = Firebase.storage("gs://helppet-18262.firebasestorage.app")
     val uploadedUrls = mutableListOf<String>()
 
-    if (fotos.isEmpty()) {
-        Toast.makeText(context, "Nenhuma foto selecionada para upload.", Toast.LENGTH_SHORT).show()
-        return uploadedUrls;
-    }
 
     try {
         for (foto in fotos) {
@@ -71,21 +81,19 @@ suspend fun handleImgUpload(context: Context, fotos: List<Uri>): List<String> {
         }
     } catch (e: Exception) {
         Log.e("Upload", "Erro ao enviar imagem: $e")
-        Toast.makeText(context, "Erro ao enviar imagens: ${e.message}", Toast.LENGTH_LONG).show()
-    }
+     }
     return uploadedUrls;
 }
 
 
 
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NewReportScreen() {
-
-    val context = LocalContext.current
-
     var nome by remember { mutableStateOf("") }
-    var fotos by remember { mutableStateOf<List<Uri>>(emptyList())  }
-    var fotosUrl by remember { mutableStateOf<List<String>>(emptyList())  }
+    var fotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var fotosUrl by remember { mutableStateOf<List<String>>(emptyList()) }
     var tipo by remember { mutableStateOf("Cachorro") }
     var descricao by remember { mutableStateOf("") }
     var contato by remember { mutableStateOf("") }
@@ -93,50 +101,52 @@ fun NewReportScreen() {
     val tipos = listOf("Cachorro", "Gato", "Outro")
     var tipoExpanded by remember { mutableStateOf(false) }
 
-
-
     val coroutineScope = rememberCoroutineScope()
+    val dataSource = FirebaseOccurrenceDataSource()
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         contract = PickMultipleVisualMedia()
     ) { uris: List<Uri> ->
         coroutineScope.launch {
-            fotosUrl = handleImgUpload(context, uris)
+            fotos = uris
+            fotosUrl = handleImgUpload(uris)
         }
     }
 
+    val updateImgs: suspend () -> Unit = {
+        fotosUrl = handleImgUpload(fotos)
+    }
 
-    val dataSource = FirebaseOccurrenceDataSource()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+            .background(Color(0xFFF2F2F2))
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             "Cadastro de Ocorrência",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            textAlign = TextAlign.Start
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
-            label = { Text("Nome do animal (opcional)") },
+            label = { Text("Nome do animal") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Dropdown Tipo
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().clickable { tipoExpanded = !tipoExpanded }) {
             OutlinedTextField(
                 value = tipo,
                 onValueChange = {},
@@ -144,11 +154,11 @@ fun NewReportScreen() {
                 enabled = false,
                 label = { Text("Tipo") },
                 trailingIcon = {
-                    IconButton(onClick = { tipoExpanded = !tipoExpanded }) {
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Abrir menu")
                 }
             )
+
+
             DropdownMenu(
                 expanded = tipoExpanded,
                 onDismissRequest = { tipoExpanded = false }
@@ -193,15 +203,66 @@ fun NewReportScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
                 pickMultipleMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageAndVideo))
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.width(200.dp).height(56.dp)
         ) {
+            Icon(
+                imageVector = Icons.Filled.CameraAlt,
+                contentDescription = "Ícone de câmera",
+                modifier = Modifier.padding(end = 8.dp)
+            )
             Text("Adicionar Imagem")
+        }
+
+        // Preview das imagens
+        if (fotos.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Imagens selecionadas:", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                fotos.forEachIndexed { index, url ->
+                    item {
+                        Box(modifier = Modifier.height(100.dp)) {
+                            AsyncImage(
+                                model = url,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                            IconButton(
+                                onClick = {
+                                    fotos = fotos.toMutableList().also { it.removeAt(index) }
+
+                                    coroutineScope.launch {
+                                        updateImgs()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .width(35.dp)
+                                    .height(35.dp)
+                            ) {
+                                Text("✕", color = Color.White, fontSize = 6.sp)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -209,7 +270,7 @@ fun NewReportScreen() {
         Button(
             onClick = {
                 val occ = Occurrence(
-                    id = "d23",
+                    id = UUID.randomUUID().toString(),
                     name = nome,
                     type = tipo,
                     address = endereco,
@@ -222,20 +283,27 @@ fun NewReportScreen() {
                     try {
                         dataSource.saveOccurrence(occ)
                         println("Ocorrência salva com sucesso")
+
                         // Limpa os campos após salvar
                         nome = ""
                         tipo = "Cachorro"
                         endereco = ""
                         descricao = ""
                         contato = ""
+                        fotosUrl = emptyList()
+                        fotos = emptyList()
+
                     } catch (e: Exception) {
                         println("Erro ao salvar ocorrência: ${e.message}")
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Enviar")
+            Text("Enviar", fontWeight = FontWeight.Bold)
         }
     }
 }

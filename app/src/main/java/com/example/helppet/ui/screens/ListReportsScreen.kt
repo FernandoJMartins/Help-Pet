@@ -30,8 +30,6 @@ fun ListReportsScreen() {
 
     val scrollState = rememberScrollState()
 
-
-    // Load data only once
     LaunchedEffect(Unit) {
         try {
             occurrences = dataSource.getOccurrences()
@@ -45,50 +43,88 @@ fun ListReportsScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(Color(0xFFF5F5F5))
+            .background(Color(0xFFF2F2F2))
             .padding(16.dp)
     ) {
         Text(
-            text = "Lista de Ocorrências",
-            fontSize = 26.sp,
+            text = "Animais Perdidos",
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            textAlign = TextAlign.Start,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         if (occurrences.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 100.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 occurrences.forEach { occ ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "Nome: ${occ.name}", fontWeight = FontWeight.Bold)
-                            Text(text = "Tipo: ${occ.type}")
-                            Text(text = "Descrição: ${occ.description}")
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
+                        Column(modifier = Modifier.padding(0.dp)) {
+                            // Imagem no topo
                             if (occ.picsUrl.isNotEmpty()) {
                                 AsyncImage(
                                     model = occ.picsUrl.first(),
                                     contentDescription = "Imagem da ocorrência",
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(200.dp)
+                                        .height(200.dp),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                 )
+                            }
+
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = occ.name,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF333333)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = occ.type,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF757575)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = occ.description,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF616161)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "📍 ${occ.address}",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF9E9E9E)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                if("@" in occ.contact){
+                                    Text(
+                                        text = "✉️ ${occ.contact}",
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF9E9E9E)
+                                    )
+                                }
+                                else {
+                                    Text(
+                                        text = "📞 ${occ.contact}",
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF9E9E9E)
+                                    )
+                                }
                             }
                         }
                     }
