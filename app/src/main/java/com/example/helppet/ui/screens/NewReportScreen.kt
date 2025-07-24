@@ -1,6 +1,7 @@
 package com.example.helppet.ui.screens
 
 import FirebaseOccurrenceDataSource
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,12 +37,55 @@ import com.example.helppet.model.Occurrence
 import kotlinx.coroutines.launch
 
 import android.util.Log
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.PickMultipleVisualMedia
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.Firebase
+
+import com.google.firebase.storage.storage
+import kotlinx.coroutines.tasks.await
+
+
+suspend fun handleImgUpload(context: Context, fotos: List<Uri>): List<String> {
+    val storage = Firebase.storage("gs://helppet-18262.firebasestorage.app")
+    val uploadedUrls = mutableListOf<String>()
+
+    if (fotos.isEmpty()) {
+        Toast.makeText(context, "Nenhuma foto selecionada para upload.", Toast.LENGTH_SHORT).show()
+        return uploadedUrls;
+    }
+
+    try {
+        for (foto in fotos) {
+            val fileName = foto.lastPathSegment ?: "image_${System.currentTimeMillis()}"
+            val imagesRef = storage.reference.child("fotos/$fileName")
+
+            imagesRef.putFile(foto).await()
+            val url = imagesRef.downloadUrl.await()
+            Log.d("Upload", "Uploaded $fileName -> $url")
+            uploadedUrls.add(url.toString())
+        }
+    } catch (e: Exception) {
+        Log.e("Upload", "Erro ao enviar imagem: $e")
+        Toast.makeText(context, "Erro ao enviar imagens: ${e.message}", Toast.LENGTH_LONG).show()
+    }
+    return uploadedUrls;
+}
 
 
 
 @Composable
 fun NewReportScreen() {
+
+    val context = LocalContext.current
+
     var nome by remember { mutableStateOf("") }
+    var fotos by remember { mutableStateOf<List<Uri>>(emptyList())  }
+    var fotosUrl by remember { mutableStateOf<List<String>>(emptyList())  }
     var tipo by remember { mutableStateOf("Cachorro") }
     var descricao by remember { mutableStateOf("") }
     var contato by remember { mutableStateOf("") }
@@ -49,7 +93,19 @@ fun NewReportScreen() {
     val tipos = listOf("Cachorro", "Gato", "Outro")
     var tipoExpanded by remember { mutableStateOf(false) }
 
+
+
     val coroutineScope = rememberCoroutineScope()
+
+    val pickMultipleMedia = rememberLauncherForActivityResult(
+        contract = PickMultipleVisualMedia()
+    ) { uris: List<Uri> ->
+        coroutineScope.launch {
+            fotosUrl = handleImgUpload(context, uris)
+        }
+    }
+
+
     val dataSource = FirebaseOccurrenceDataSource()
 
     Column(
@@ -137,6 +193,17 @@ fun NewReportScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                pickMultipleMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageAndVideo))
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Adicionar Imagem")
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
@@ -148,7 +215,7 @@ fun NewReportScreen() {
                     address = endereco,
                     description = descricao,
                     contact = contato,
-                    picsUrl = listOf("asc", "asdasd")
+                    picsUrl = fotosUrl,
                 )
 
                 coroutineScope.launch {

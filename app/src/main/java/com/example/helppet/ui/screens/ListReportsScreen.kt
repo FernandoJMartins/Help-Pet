@@ -1,21 +1,10 @@
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,78 +12,88 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.helppet.model.Occurrence
 import kotlinx.coroutines.launch
 
-@SuppressLint("CoroutineCreationDuringComposition") //carrega as ocorrencias
+
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
+
 @Composable
 fun ListReportsScreen() {
     val coroutineScope = rememberCoroutineScope()
     val dataSource = FirebaseOccurrenceDataSource()
-
     var occurrences by remember { mutableStateOf<List<Occurrence>>(emptyList()) }
 
-    coroutineScope.launch {
+    val scrollState = rememberScrollState()
+
+
+    // Load data only once
+    LaunchedEffect(Unit) {
         try {
             occurrences = dataSource.getOccurrences()
-            println("Ocorrência carregada sucesso")
+            println("Ocorrência carregada com sucesso")
         } catch (e: Exception) {
             println("Erro ao carregar ocorrências: ${e.message}")
         }
     }
 
-
-    Text(
-        "Cadastro de Ocorrência",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(scrollState)
+            .background(Color(0xFFF5F5F5))
+            .padding(16.dp)
     ) {
-        for (occ in occurrences)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+        Text(
+            text = "Lista de Ocorrências",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        if (occurrences.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "Cadastro de Ocorrência",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Renderiza cada ocorrência
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 occurrences.forEach { occ ->
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "Nome: ${occ.name}")
+                            Text(text = "Nome: ${occ.name}", fontWeight = FontWeight.Bold)
                             Text(text = "Tipo: ${occ.type}")
                             Text(text = "Descrição: ${occ.description}")
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            if (occ.picsUrl.isNotEmpty()) {
+                                AsyncImage(
+                                    model = occ.picsUrl.first(),
+                                    contentDescription = "Imagem da ocorrência",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
     }
-
 }
