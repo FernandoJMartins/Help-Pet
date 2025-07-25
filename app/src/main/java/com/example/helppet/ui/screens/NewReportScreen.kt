@@ -55,6 +55,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.runtime.MutableState
 
 import androidx.compose.ui.draw.clip
 import com.example.helppet.data.repository.FirebaseUserDao
@@ -86,7 +87,7 @@ suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
 
 
 @Composable
-fun NewReportScreen() {
+fun NewReportScreen(userState: MutableState<User?>) {
     var nome by remember { mutableStateOf("") }
     var fotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var fotosUrl by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -102,9 +103,7 @@ fun NewReportScreen() {
     val dataSource = FirebaseOccurrenceDao()
     val dataUserSource = FirebaseUserDao()
 
-    val currentUser = User.currentUser
-
-
+    val currentUser = userState.value
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         contract = PickMultipleVisualMedia()
@@ -289,7 +288,7 @@ fun NewReportScreen() {
                     try {
                         println(currentUser.uid)
                         dataSource.saveOccurrence(occ)
-                        dataUserSource.addOccurrenceToUser(currentUser, occ)
+                        dataUserSource.addOccurrenceToUser(currentUser, occ, userState)
                         println("Ocorrência salva com sucesso")
 
                         // Limpa os campos após salvar

@@ -20,9 +20,10 @@ import com.example.helppet.model.User
 
 @Composable
 fun ProfileScreen(
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    userState: MutableState<User?>
 ) {
-    val currentUser = User.currentUser
+    val currentUser = userState.value
 
     Surface(modifier = Modifier.fillMaxSize()) {
         if (currentUser == null) {

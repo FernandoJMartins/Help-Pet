@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.helppet.model.User
 import com.example.helppet.ui.theme.HelpPetTheme
 import com.example.helppet.ui.components.BottomNavigationBar
 import com.example.helppet.ui.screens.NewReportScreen
@@ -42,6 +43,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(onLogout: () -> Unit) {
     var selectedItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Home) }
+    val userState = remember { mutableStateOf(User.currentUser) }
+
 
     Scaffold(
         bottomBar = {
@@ -53,9 +56,9 @@ fun MainScreen(onLogout: () -> Unit) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedItem) {
-                BottomNavItem.NewReport -> NewReportScreen()
+                BottomNavItem.NewReport -> NewReportScreen(userState = userState)
                 BottomNavItem.Home -> HomeScreen()
-                BottomNavItem.Profile -> ProfileScreen(onLogout = onLogout)
+                BottomNavItem.Profile -> ProfileScreen(onLogout = onLogout, userState = userState)
             }
         }
     }

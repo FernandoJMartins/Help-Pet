@@ -1,5 +1,9 @@
 package com.example.helppet.model
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 data class User(
     var uid: String = "",
     var name: String = "",
@@ -10,9 +14,9 @@ data class User(
 ) {
 
     companion object {
-        private var _currentUser: User? = null
+        var _currentUser by mutableStateOf<User?>(null)
 
-        val currentUser: User?
+        var currentUser: User? = null
             get() = _currentUser
 
 
