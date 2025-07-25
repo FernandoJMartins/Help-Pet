@@ -1,26 +1,25 @@
-package com.example.helppet.data.firebase
+package com.example.helppet.data.repository
 
-import com.example.helppet.data.repository.IOccurrenceDataSource
+import android.util.Log
 import com.example.helppet.model.Occurrence
-import com.example.helppet.model.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class FirebaseOccurrenceDataSource : IOccurrenceDataSource{
+class FirebaseOccurrenceDao{
     private val db = FirebaseFirestore.getInstance()
 
-    override fun saveOccurrence(occurrence: Occurrence) {
+    fun saveOccurrence(occurrence: Occurrence) {
         db.collection("occurrences")
             .add(occurrence)
             .addOnSuccessListener{
-                System.out.println("Salvo com ID: ${it.id}")
+                Log.e("FirebaseOccurrence", "Occurrence Saved")
             }
         .addOnFailureListener { e ->
-            System.out.println(e)
+            Log.e("FirebaseOccurrence", "Error while saving Occurrence", e)
         };
     }
 
-    override suspend fun getOccurrences(): List<Occurrence> {
+    suspend fun getOccurrences(): List<Occurrence> {
         val snapshot = db.collection("occurrences").get().await()
         return snapshot.documents.mapNotNull { it.toObject(Occurrence::class.java) }
 

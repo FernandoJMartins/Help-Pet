@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,13 +29,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.helppet.data.firebase.FirebaseOccurrenceDataSource
+import com.example.helppet.data.repository.FirebaseOccurrenceDao
 import com.example.helppet.model.Occurrence
 
 @Composable
 fun HomeScreen() {
-    val coroutineScope = rememberCoroutineScope()
-    val dataSource = FirebaseOccurrenceDataSource()
+    val dataSource = FirebaseOccurrenceDao()
     var occurrences by remember { mutableStateOf<List<Occurrence>>(emptyList()) }
 
 
@@ -44,7 +42,7 @@ fun HomeScreen() {
     LaunchedEffect(Unit) {
         try {
             occurrences = dataSource.getOccurrences()
-            println("Ocorrência carregada com sucesso")
+            println("Ocorrências carregada com sucesso")
         } catch (e: Exception) {
             println("Erro ao carregar ocorrências: ${e.message}")
         }
@@ -87,7 +85,6 @@ fun HomeScreen() {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(0.dp)) {
-                            // Imagem no topo
                             if (occ.picsUrl.isNotEmpty()) {
                                 AsyncImage(
                                     model = occ.picsUrl.first(),

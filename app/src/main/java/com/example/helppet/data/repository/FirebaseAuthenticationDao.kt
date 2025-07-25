@@ -1,4 +1,4 @@
-package com.example.helppet.data.firebase
+package com.example.helppet.data.repository
 
 import android.util.Log
 import com.example.helppet.model.Occurrence
@@ -6,7 +6,7 @@ import com.example.helppet.model.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class FirebaseAuthentication {
+class FirebaseAuthenticationDao {
     private val db = FirebaseFirestore.getInstance()
     private val collection = "users"
 
@@ -27,7 +27,7 @@ class FirebaseAuthentication {
         }
     }
 
-    suspend fun updateUser(user: User){
+    fun updateUser(user: User){
         try {
             db.collection(collection).document(user.id).set(user)
         } catch (e: Exception) {

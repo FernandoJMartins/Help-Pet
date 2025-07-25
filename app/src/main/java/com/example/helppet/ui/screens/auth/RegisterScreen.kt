@@ -10,14 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.helppet.data.firebase.FirebaseAuthentication
+import com.example.helppet.data.repository.FirebaseAuthenticationDao
 import com.example.helppet.model.User
 import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
 fun RegisterScreen(
-    auth: FirebaseAuthentication = FirebaseAuthentication(),
+    auth: FirebaseAuthenticationDao = FirebaseAuthenticationDao(),
     onRegisterSuccess: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -96,6 +96,7 @@ fun RegisterScreen(
                         scope.launch {
                             try {
                                 auth.createUser(newUser)
+                                auth.login(email, pass)
                                 isLoading = false
                                 onRegisterSuccess()
                             } catch (e: Exception) {

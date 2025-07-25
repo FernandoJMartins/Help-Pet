@@ -1,7 +1,5 @@
 package com.example.helppet.model
 
-import android.net.Uri
-
 data class Occurrence(
     var userId : String  = "",
     var id: String? = null,

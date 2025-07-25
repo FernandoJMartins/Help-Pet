@@ -9,12 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.helppet.data.firebase.FirebaseAuthentication
+import com.example.helppet.data.repository.FirebaseAuthenticationDao
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    auth: FirebaseAuthentication = FirebaseAuthentication(),
+    auth: FirebaseAuthenticationDao = FirebaseAuthenticationDao(),
     onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }

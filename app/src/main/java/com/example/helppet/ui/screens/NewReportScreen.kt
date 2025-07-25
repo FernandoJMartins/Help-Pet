@@ -1,6 +1,6 @@
 package com.example.helppet.ui.screens
 
-import com.example.helppet.data.firebase.FirebaseOccurrenceDataSource
+import com.example.helppet.data.repository.FirebaseOccurrenceDao
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +41,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.PickMultipleVisualMedia
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import android.net.Uri
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -58,7 +57,7 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.material.icons.filled.CameraAlt
 
 import androidx.compose.ui.draw.clip
-import com.example.helppet.data.firebase.FirebaseAuthentication
+import com.example.helppet.data.repository.FirebaseAuthenticationDao
 import com.example.helppet.model.User
 import com.example.helppet.model.User.Companion.currentUser
 
@@ -91,7 +90,6 @@ suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
 
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NewReportScreen() {
     var nome by remember { mutableStateOf("") }
@@ -105,8 +103,10 @@ fun NewReportScreen() {
     var tipoExpanded by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-    val dataSource = FirebaseOccurrenceDataSource()
-    val dataUserSource = FirebaseAuthentication()
+    val dataSource = FirebaseOccurrenceDao()
+    val dataUserSource = FirebaseAuthenticationDao()
+
+
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         contract = PickMultipleVisualMedia()
