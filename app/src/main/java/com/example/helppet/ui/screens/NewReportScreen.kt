@@ -57,19 +57,14 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.material.icons.filled.CameraAlt
 
 import androidx.compose.ui.draw.clip
-import com.example.helppet.data.repository.FirebaseAuthenticationDao
+import com.example.helppet.data.repository.FirebaseUserDao
 import com.example.helppet.model.User
-import com.example.helppet.model.User.Companion.currentUser
 
 import java.util.UUID
 
 suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
     val storage = Firebase.storage("gs://helppet-18262.firebasestorage.app")
     val uploadedUrls = mutableListOf<String>()
-
-
-    val currentUser = User.currentUser
-
 
     try {
         for (foto in fotos) {
@@ -103,8 +98,11 @@ fun NewReportScreen() {
     var tipoExpanded by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
+
     val dataSource = FirebaseOccurrenceDao()
-    val dataUserSource = FirebaseAuthenticationDao()
+    val dataUserSource = FirebaseUserDao()
+
+    val currentUser = User.currentUser
 
 
 
@@ -277,21 +275,21 @@ fun NewReportScreen() {
         Button(
             onClick = {
                 val occ = Occurrence(
-                    id = UUID.randomUUID().toString(),
+                    uid = UUID.randomUUID().toString(),
                     name = nome,
                     type = tipo,
                     address = endereco,
                     description = descricao,
                     contact = contato,
                     picsUrl = fotosUrl,
-                    userId = currentUser!!.id
+                    userId = currentUser.uid
                 )
 
                 coroutineScope.launch {
                     try {
+                        println(currentUser.uid)
                         dataSource.saveOccurrence(occ)
-                        User.addCreatedOccurrence(occ)
-                        dataUserSource.updateUser(currentUser!!)
+                        dataUserSource.addOccurrenceToUser(currentUser, occ)
                         println("Ocorrência salva com sucesso")
 
                         // Limpa os campos após salvar

@@ -7,16 +7,18 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseOccurrenceDao{
     private val db = FirebaseFirestore.getInstance()
+    private val collection = "occurrences"
 
-    fun saveOccurrence(occurrence: Occurrence) {
-        db.collection("occurrences")
-            .add(occurrence)
-            .addOnSuccessListener{
-                Log.e("FirebaseOccurrence", "Occurrence Saved")
+    suspend fun saveOccurrence(occurrence: Occurrence) {
+        try {
+            occurrence.uid?.let {
+                db.collection(collection)
+                    .document(it).set(occurrence).await()
             }
-        .addOnFailureListener { e ->
-            Log.e("FirebaseOccurrence", "Error while saving Occurrence", e)
-        };
+        } catch (e: Exception) {
+            Log.e("FirebaseAuth", "Erro ao cadastrar Ocorrência", e)
+            throw e
+        }
     }
 
     suspend fun getOccurrences(): List<Occurrence> {

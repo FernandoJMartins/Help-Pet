@@ -1,12 +1,12 @@
 package com.example.helppet.model
 
 data class User(
-    val id: String = "",
-    val name: String = "",
-    val email: String = "",
-    val pass: String = "",
-    val occSolved: List<Occurrence> = emptyList(),
-    val occCreated: List<Occurrence> = emptyList()
+    var uid: String = "",
+    var name: String = "",
+    var email: String = "",
+    var pass: String = "",
+    var occSolved: List<Occurrence> = emptyList(),
+    var occCreated: List<Occurrence> = emptyList()
 ) {
 
     companion object {
@@ -20,22 +20,8 @@ data class User(
             _currentUser = user
         }
 
-        fun getLoggedUser(): User? {
-            return _currentUser
-        }
-
         fun logout() {
             _currentUser = null
-        }
-
-        fun isLoggedIn(): Boolean {
-            return _currentUser != null
-        }
-
-        fun addCreatedOccurrence(occ: Occurrence) {
-            _currentUser = _currentUser?.copy(
-                occCreated = _currentUser?.occCreated.orEmpty() + occ
-            )
         }
 
     }

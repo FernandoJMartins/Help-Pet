@@ -1,5 +1,6 @@
 package com.example.helppet.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -32,14 +34,25 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .background(Color(0xFFF2F2F2))
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Perfil do Usuário", style = MaterialTheme.typography.headlineMedium)
+                Text("Perfil do Usuário",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    style = MaterialTheme.typography.headlineMedium)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text("Nome: ${currentUser.name}", style = MaterialTheme.typography.bodyLarge)
+                Text(currentUser.name,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    style = MaterialTheme.typography.bodyLarge)
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text("Email: ${currentUser.email}", style = MaterialTheme.typography.bodyLarge)
@@ -81,7 +94,8 @@ fun ProfileScreen(
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-
+                Divider()
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Button(onClick = {
                     User.logout()

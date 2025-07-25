@@ -3,35 +3,34 @@ package com.example.helppet.data.repository
 import android.util.Log
 import com.example.helppet.model.Occurrence
 import com.example.helppet.model.User
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class FirebaseAuthenticationDao {
+class FirebaseUserDao {
     private val db = FirebaseFirestore.getInstance()
     private val collection = "users"
 
     suspend fun createUser(user: User) {
         try {
-            val data = mapOf(
-                "id" to user.id,
-                "name" to user.name,
-                "email" to user.email,
-                "pass" to user.pass,
-                "occSolved" to user.occSolved.map { it.toMap() },
-                "occCreated" to user.occCreated.map { it.toMap() }
-            )
-            db.collection(collection).add(data).await()
+            db.collection(collection).document(user.uid).set(user).await()
         } catch (e: Exception) {
             Log.e("FirebaseAuth", "Erro ao cadastrar usuário", e)
             throw e
         }
     }
 
-    fun updateUser(user: User){
+    suspend fun addOccurrenceToUser(user: User, occurrence: Occurrence) {
         try {
-            db.collection(collection).document(user.id).set(user)
+            val occurrenceMap = occurrence.toMap().toMutableMap()
+
+            db.collection(collection)
+                .document(user.uid)
+                .update("occCreated", FieldValue.arrayUnion(occurrenceMap))
+                .await()
+
         } catch (e: Exception) {
-            Log.e("FirebaseAuth", "Erro ao atualizar usuário", e)
+            Log.e("FirebaseAuth", "Erro ao adicionar ocorrência criada", e)
             throw e
         }
     }
@@ -46,13 +45,13 @@ class FirebaseAuthenticationDao {
 
             if (result.isEmpty) return false
 
-            val doc = result.documents.first()
+            val doc = result.documents.first() //tras a primeira Ocorrencia
 
             val occSolvedList = doc.toOccurrenceList("occSolved")
             val occCreatedList = doc.toOccurrenceList("occCreated")
 
             val user = User(
-                id = doc.getString("id") ?: "",
+                uid = doc.getString("uid") ?: "",
                 name = doc.getString("name") ?: "",
                 email = doc.getString("email") ?: "",
                 pass = doc.getString("pass") ?: "",
@@ -70,7 +69,7 @@ class FirebaseAuthenticationDao {
 
     private fun Occurrence.toMap(): Map<String, Any?> = mapOf(
         "userId" to userId,
-        "id" to id,
+        "uid" to uid,
         "name" to name,
         "type" to type,
         "address" to address,
@@ -84,7 +83,7 @@ class FirebaseAuthenticationDao {
         return (get(field) as? List<Map<String, Any?>>)?.map {
             Occurrence(
                 userId = it["userId"] as? String ?: "",
-                id = it["id"] as? String,
+                uid = it["uid"] as? String,
                 name = it["name"] as? String ?: "",
                 type = it["type"] as? String ?: "",
                 address = it["address"] as? String ?: "",

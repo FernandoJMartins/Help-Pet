@@ -2,7 +2,7 @@ package com.example.helppet.model
 
 data class Occurrence(
     var userId : String  = "",
-    var id: String? = null,
+    var uid: String? = null,
     var name: String = "",
     var type: String = "",
     var address: String = "",
