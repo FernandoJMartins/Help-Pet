@@ -1,6 +1,8 @@
-import android.util.Log
+package com.example.helppet.data.firebase
+
 import com.example.helppet.data.repository.IOccurrenceDataSource
 import com.example.helppet.model.Occurrence
+import com.example.helppet.model.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 

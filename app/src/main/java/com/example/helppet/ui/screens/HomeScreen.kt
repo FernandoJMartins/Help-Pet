@@ -30,16 +30,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.helppet.data.firebase.FirebaseOccurrenceDataSource
 import com.example.helppet.model.Occurrence
 
 @Composable
 fun HomeScreen() {
-
     val coroutineScope = rememberCoroutineScope()
     val dataSource = FirebaseOccurrenceDataSource()
     var occurrences by remember { mutableStateOf<List<Occurrence>>(emptyList()) }
 
-    val scrollState = rememberScrollState()
+
 
     LaunchedEffect(Unit) {
         try {
@@ -53,18 +53,21 @@ fun HomeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
+            .verticalScroll(rememberScrollState())
             .background(Color(0xFFF2F2F2))
-            .padding(16.dp)
+            .padding(24.dp) ,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Animais Perdidos",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
+        if (occurrences.isNotEmpty()) {
+            Text(
+                text = "Animais Perdidos",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
         if (occurrences.isEmpty()) {
             Box(
                 modifier = Modifier

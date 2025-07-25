@@ -1,7 +1,6 @@
 package com.example.helppet.ui.screens
 
-import FirebaseOccurrenceDataSource
-import android.content.Context
+import com.example.helppet.data.firebase.FirebaseOccurrenceDataSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.PickMultipleVisualMedia
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
@@ -52,7 +50,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.google.firebase.Firebase
 
@@ -61,12 +58,18 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.material.icons.filled.CameraAlt
 
 import androidx.compose.ui.draw.clip
+import com.example.helppet.data.firebase.FirebaseAuthentication
+import com.example.helppet.model.User
+import com.example.helppet.model.User.Companion.currentUser
 
 import java.util.UUID
 
 suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
     val storage = Firebase.storage("gs://helppet-18262.firebasestorage.app")
     val uploadedUrls = mutableListOf<String>()
+
+
+    val currentUser = User.currentUser
 
 
     try {
@@ -103,6 +106,7 @@ fun NewReportScreen() {
 
     val coroutineScope = rememberCoroutineScope()
     val dataSource = FirebaseOccurrenceDataSource()
+    val dataUserSource = FirebaseAuthentication()
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         contract = PickMultipleVisualMedia()
@@ -127,14 +131,13 @@ fun NewReportScreen() {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
-            "Cadastro de Ocorrência",
+            text = "Cadastrar Ocorrência",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         OutlinedTextField(
@@ -189,7 +192,7 @@ fun NewReportScreen() {
         OutlinedTextField(
             value = descricao,
             onValueChange = { descricao = it },
-            label = { Text("Descrição do ocorrido") },
+            label = { Text("Descrição do animal") },
             modifier = Modifier.fillMaxWidth(),
             maxLines = 5
         )
@@ -207,16 +210,19 @@ fun NewReportScreen() {
 
         Button(
             onClick = {
-                pickMultipleMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageAndVideo))
+                pickMultipleMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
             },
-            modifier = Modifier.width(200.dp).height(56.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(12.dp),
         ) {
             Icon(
                 imageVector = Icons.Filled.CameraAlt,
                 contentDescription = "Ícone de câmera",
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text("Adicionar Imagem")
+            Text("Adicionar Imagem", fontWeight = FontWeight.SemiBold)
         }
 
         // Preview das imagens
@@ -267,6 +273,7 @@ fun NewReportScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        if (currentUser != null){
         Button(
             onClick = {
                 val occ = Occurrence(
@@ -277,11 +284,14 @@ fun NewReportScreen() {
                     description = descricao,
                     contact = contato,
                     picsUrl = fotosUrl,
+                    userId = currentUser!!.id
                 )
 
                 coroutineScope.launch {
                     try {
                         dataSource.saveOccurrence(occ)
+                        User.addCreatedOccurrence(occ)
+                        dataUserSource.updateUser(currentUser!!)
                         println("Ocorrência salva com sucesso")
 
                         // Limpa os campos após salvar
@@ -305,5 +315,5 @@ fun NewReportScreen() {
         ) {
             Text("Enviar", fontWeight = FontWeight.Bold)
         }
-    }
+    }}
 }

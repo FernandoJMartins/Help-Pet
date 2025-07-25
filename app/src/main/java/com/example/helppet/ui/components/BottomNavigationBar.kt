@@ -5,6 +5,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import com.example.helppet.BottomNavItem
 
 @Composable
@@ -12,11 +13,13 @@ fun BottomNavigationBar(
     selectedItem: BottomNavItem,
     onItemSelected: (BottomNavItem) -> Unit
 ) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = Color(0xFF80CBC4)
+    )
+    {
         listOf(
-            BottomNavItem.Home,
             BottomNavItem.NewReport,
-            BottomNavItem.ListReports,
+            BottomNavItem.Home,
             BottomNavItem.Profile
         ).forEach { item ->
             NavigationBarItem(
