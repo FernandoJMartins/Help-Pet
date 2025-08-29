@@ -70,6 +70,32 @@ class UserViewModel : ViewModel()  {
             }
         }
     }
+
+
+
+
+    fun login(email: String, pass: String) {
+        viewModelScope.launch {
+            _uiState.value = UserUIState.Loading
+            try {
+                val success = repository.login(email, pass)
+                if (success) {
+                    // O usuário logado está em User.currentUser
+                    val user = User.currentUser
+                    if (user != null) {
+                        _uiState.value = UserUIState.Success(user)
+
+                    } else {
+                        _uiState.value = UserUIState.Error("Usuário não encontrado após login")
+                    }
+                } else {
+                    _uiState.value = UserUIState.Error("Email ou senha incorretos")
+                }
+            } catch (e: Exception) {
+                _uiState.value = UserUIState.Error(e.message ?: "Erro desconhecido")
+            }
+        }
+    }
 }
 
 

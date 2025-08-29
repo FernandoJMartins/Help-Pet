@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    kotlin("kapt")
 }
 
 android {
@@ -51,6 +52,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
 
+    // Gson for Room converters
+    implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-auth")

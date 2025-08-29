@@ -1,8 +1,6 @@
 package com.example.helppet.ui.screens.auth
 
-
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,148 +10,184 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.helppet.R
-import com.example.helppet.data.repository.FirebaseUserDao
 import com.example.helppet.model.User
+import com.example.helppet.viewmodels.UserViewModel
+import com.example.helppet.viewmodels.UserUIState
+import java.util.UUID
 import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
 fun RegisterScreen(
-    auth: FirebaseUserDao = FirebaseUserDao(),
+    viewModel: UserViewModel,
     onRegisterSuccess: () -> Unit
 ) {
+    val state by viewModel.uiState.collectAsState()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
 
-    var isLoading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    // Observa mudanças no estado e redireciona quando registro for bem-sucedido
+    LaunchedEffect(state) {
+        if (state is UserUIState.Success) {
+            onRegisterSuccess()
+        }
+    }
 
-    val scope = rememberCoroutineScope()
-
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF2F2F2))
-                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Header com logo
+            Card(
+                modifier = Modifier.size(100.dp),
+                shape = CircleShape,
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo2),
+                    contentDescription = "Logo HelpPet",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                )
+            }
 
-
-            Image(
-                painter = painterResource(id = R.drawable.logo2),
-                contentDescription = "Logo HelpPet",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(140.dp)
-                    .clip(CircleShape)
-            )
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = "Criar Conta",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nome") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
+            Text(
+                text = "Junte-se à nossa comunidade",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
+            // Card com formulário
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Nome completo") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            )
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = pass,
+                        onValueChange = { pass = it },
+                        label = { Text("Senha") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
 
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = pass,
-                onValueChange = { pass = it },
-                label = { Text("Senha") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            if (isLoading) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = {
-                        error = null
-                        isLoading = true
-
-                        val newUser = User(
-                            uid = UUID.randomUUID().toString(),
-                            name = name,
-                            email = email,
-                            pass = pass,
-                            occSolved = emptyList(),
-                            occCreated = emptyList()
-                        )
-
-                        scope.launch {
-                            try {
-                                auth.createUser(newUser)
-                                auth.login(email, pass)
-                                isLoading = false
-                                onRegisterSuccess()
-                            } catch (e: Exception) {
-                                isLoading = false
-                                error = "Erro ao registrar: ${e.message}"
+                    when (state) {
+                        is UserUIState.Loading -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Cadastrar", style = MaterialTheme.typography.titleMedium)
+                        else -> {
+                            Button(
+                                onClick = {
+                                    val newUser = User(
+                                        uid = UUID.randomUUID().toString(),
+                                        name = name,
+                                        email = email,
+                                        pass = pass,
+                                        occSolved = emptyList(),
+                                        occCreated = emptyList()
+                                    )
+                                    viewModel.createUser(newUser)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                            ) {
+                                Text(
+                                    "Cadastrar",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
-            error?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Mostra erro se houver
+            if (state is UserUIState.Error) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = (state as UserUIState.Error).msg ?: "Erro desconhecido",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }

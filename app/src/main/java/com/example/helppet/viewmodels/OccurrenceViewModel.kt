@@ -20,6 +20,9 @@ sealed class OccurrenceUIState {
 class OccurrenceViewModel : ViewModel()  {
     private val repository = FirebaseOccurrenceDao()
 
+    private val _occurrences = MutableStateFlow<List<Occurrence>>(emptyList())
+    val occurrences: StateFlow<List<Occurrence>> = _occurrences
+
     private val _uiState = MutableStateFlow<OccurrenceUIState>(OccurrenceUIState.Idle)
     val uiState: StateFlow<OccurrenceUIState> = _uiState
 

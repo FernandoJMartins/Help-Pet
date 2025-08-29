@@ -1,5 +1,7 @@
 package com.example.helppet.ui.screens
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,16 +15,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.helppet.MainScreen
 import com.example.helppet.R
 import com.example.helppet.ui.screens.auth.LoginScreen
 import com.example.helppet.ui.screens.auth.RegisterScreen
+import com.example.helppet.viewmodels.OccurrenceViewModel
+import com.example.helppet.viewmodels.UserViewModel
 
 @Composable
 fun WelcomeRootScreen() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Welcome) }
+    
+    // Instancias compartilhadas dos ViewModels
+    val userViewModel = remember { UserViewModel() }
+    val occurrenceViewModel = remember { OccurrenceViewModel() }
 
     when (currentScreen) {
         Screen.Welcome -> WelcomeScreen(
@@ -30,14 +40,23 @@ fun WelcomeRootScreen() {
             onRegisterClick = { currentScreen = Screen.Register }
         )
         Screen.Login -> LoginScreen(
+            viewModel = userViewModel,
             onLoginSuccess = { currentScreen = Screen.Main }
         )
         Screen.Register -> RegisterScreen(
-            onRegisterSuccess = { currentScreen = Screen.Main }
+            viewModel = userViewModel,
+            onRegisterSuccess = {
+                currentScreen = Screen.Main
+            }
         )
-        Screen.Main -> MainScreen(   onLogout = { currentScreen = Screen.Welcome })
+        Screen.Main -> MainScreen(
+            onLogout = { currentScreen = Screen.Welcome },
+            userViewModel = userViewModel,
+            occurrenceViewModel = occurrenceViewModel
+        )
     }
 }
+
 
 enum class Screen {
     Welcome, Login, Register, Main
@@ -48,69 +67,126 @@ fun WelcomeScreen(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
 ) {
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF2F2F2))
-                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 40.dp)
         ) {
-
-            Image(
-                painter = painterResource(id = R.drawable.logo2),
-                contentDescription = "Logo HelpPet",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(140.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-
-            Text(
-                text = "Bem-vindo ao HelpPet",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            Text(
-                text = "Conectando pessoas para reencontrar pets perdidos.\n\n" +
-                        "O HelpPet é uma plataforma dedicada a facilitar a localização " +
-                        "de cães e gatos desaparecidos, unindo tutores e a comunidade " +
-                        "em uma rede de apoio e solidariedade.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.DarkGray,
-                lineHeight = 22.sp
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-
-            Button(
-                onClick = onLoginClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+            // Seção superior com logo e título
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
-                Text("Entrar", style = MaterialTheme.typography.titleMedium)
+                // Logo com sombra elegante
+                Card(
+                    modifier = Modifier.size(120.dp),
+                    shape = CircleShape,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo2),
+                        contentDescription = "Logo HelpPet",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = "HelpPet",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Conectando corações para reencontrar pets",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(
-                onClick = onRegisterClick,
+            // Seção central com descrição
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+                    .padding(vertical = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text("Registrar", style = MaterialTheme.typography.titleMedium)
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Nossa Missão",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "O HelpPet é uma plataforma dedicada a facilitar a localização de cães e gatos desaparecidos, unindo tutores e a comunidade em uma rede de apoio e solidariedade.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 24.sp
+                    )
+                }
+            }
+
+            // Seção inferior com botões
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = onLoginClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        "Entrar",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onRegisterClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        "Criar Conta",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

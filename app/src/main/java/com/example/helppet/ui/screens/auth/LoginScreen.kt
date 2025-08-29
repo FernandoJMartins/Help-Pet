@@ -18,20 +18,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.helppet.R
-import com.example.helppet.data.repository.FirebaseUserDao
-import kotlinx.coroutines.launch
+import com.example.helppet.viewmodels.UserUIState
+import com.example.helppet.viewmodels.UserViewModel
 
 @Composable
-fun LoginScreen(
-    auth: FirebaseUserDao = FirebaseUserDao(),
-    onLoginSuccess: () -> Unit
-) {
+fun LoginScreen(viewModel: UserViewModel = UserViewModel(), onLoginSuccess: () -> Unit) {
+    val state by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
 
-    val scope = rememberCoroutineScope()
+    LaunchedEffect(state) {
+        if (state is UserUIState.Success) {
+            onLoginSuccess()
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -89,31 +89,43 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+            Button(
+                onClick = {
+                    viewModel.login(email, pass)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Entrar", style = MaterialTheme.typography.titleMedium)
+            }
+        }
 
-            if (isLoading) {
+
+        when (state) {
+            is UserUIState.Idle -> {
+                Text(text = "Digite um Email")
+            }
+
+            is UserUIState.Loading -> {
+                Text(text = "Carregando...")
                 CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = {
-                        error = null
-                        isLoading = true
-                        scope.launch {
-                            val success = auth.login(email, pass)
-                            isLoading = false
-                            if (success) {
-                                onLoginSuccess()
-                            } else {
-                                error = "Email ou senha incorretos"
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Entrar", style = MaterialTheme.typography.titleMedium)
-                }
+            }
+
+            is UserUIState.Success -> {
+                val user = (state as UserUIState.Success).data
+                Text(text = "Nome:")
+                TextField(value = user.name, onValueChange = {}, enabled = false)
+                Text(text = "Email: ")
+                TextField(value = user.email, onValueChange = {}, enabled = false)
+            }
+
+            is UserUIState.Error -> {
+                Text(
+                    text = (state as UserUIState.Error).msg ?: "Erro desconhecido",
+                    color = Color.Red
+                )
             }
         }
     }
