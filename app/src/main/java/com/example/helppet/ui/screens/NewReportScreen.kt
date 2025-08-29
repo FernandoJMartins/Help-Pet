@@ -1,6 +1,5 @@
 package com.example.helppet.ui.screens
 
-import com.example.helppet.data.repository.FirebaseOccurrenceDao
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,11 +55,12 @@ import com.google.firebase.Firebase
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.runtime.MutableState
 
 import androidx.compose.ui.draw.clip
-import com.example.helppet.data.repository.FirebaseUserDao
-import com.example.helppet.model.User
+import com.example.helppet.viewmodels.OccurrenceViewModel
+import com.example.helppet.viewmodels.UserViewModel
+import com.example.helppet.viewmodels.UserUIState
+import org.koin.androidx.compose.koinViewModel
 
 import java.util.UUID
 
@@ -87,7 +88,10 @@ suspend fun handleImgUpload(fotos: List<Uri>): List<String> {
 
 
 @Composable
-fun NewReportScreen(userState: MutableState<User?>) {
+fun NewReportScreen(
+    userViewModel: UserViewModel = koinViewModel<UserViewModel>(),
+    occurrenceViewModel: OccurrenceViewModel = koinViewModel<OccurrenceViewModel>()
+) {
     var nome by remember { mutableStateOf("") }
     var fotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var fotosUrl by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -99,11 +103,13 @@ fun NewReportScreen(userState: MutableState<User?>) {
     var tipoExpanded by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-
-    val dataSource = FirebaseOccurrenceDao()
-    val dataUserSource = FirebaseUserDao()
-
-    val currentUser = userState.value
+    
+    // Pega o usuário atual do UserViewModel
+    val userState by userViewModel.uiState.collectAsState()
+    val currentUser = when (userState) {
+        is UserUIState.Success -> (userState as UserUIState.Success).data
+        else -> null
+    }
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         contract = PickMultipleVisualMedia()
@@ -270,47 +276,47 @@ fun NewReportScreen(userState: MutableState<User?>) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (currentUser != null){
-        Button(
-            onClick = {
-                val occ = Occurrence(
-                    uid = UUID.randomUUID().toString(),
-                    name = nome,
-                    type = tipo,
-                    address = endereco,
-                    description = descricao,
-                    contact = contato,
-                    picsUrl = fotosUrl,
-                    userId = currentUser.uid
-                )
+        if (currentUser != null) {
+            Button(
+                onClick = {
+                    val occ = Occurrence(
+                        uid = UUID.randomUUID().toString(),
+                        name = nome,
+                        type = tipo,
+                        address = endereco,
+                        description = descricao,
+                        contact = contato,
+                        picsUrl = fotosUrl,
+                        userId = currentUser.uid
+                    )
 
-                coroutineScope.launch {
-                    try {
-                        println(currentUser.uid)
-                        dataSource.saveOccurrence(occ)
-                        dataUserSource.addOccurrenceToUser(currentUser, occ, userState)
-                        println("Ocorrência salva com sucesso")
+                    coroutineScope.launch {
+                        try {
+                            println(currentUser.uid)
+                            occurrenceViewModel.saveOccurrence(occ)
+                            println("Ocorrência salva com sucesso")
 
-                        // Limpa os campos após salvar
-                        nome = ""
-                        tipo = "Cachorro"
-                        endereco = ""
-                        descricao = ""
-                        contato = ""
-                        fotosUrl = emptyList()
-                        fotos = emptyList()
+                            // Limpa os campos após salvar
+                            nome = ""
+                            tipo = "Cachorro"
+                            endereco = ""
+                            descricao = ""
+                            contato = ""
+                            fotosUrl = emptyList()
+                            fotos = emptyList()
 
-                    } catch (e: Exception) {
-                        println("Erro ao salvar ocorrência: ${e.message}")
+                        } catch (e: Exception) {
+                            println("Erro ao salvar ocorrência: ${e.message}")
+                        }
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Enviar", fontWeight = FontWeight.Bold)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Enviar", fontWeight = FontWeight.Bold)
+            }
         }
-    }}
+    }
 }

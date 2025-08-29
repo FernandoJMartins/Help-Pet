@@ -3,6 +3,7 @@ package com.example.helppet.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.helppet.clientservice.UserDao
 import com.example.helppet.data.repository.FirebaseUserDao
 import com.example.helppet.model.Occurrence
 import com.example.helppet.model.User
@@ -18,7 +19,7 @@ sealed class UserUIState {
     object Loading : UserUIState()
 }
 
-class UserViewModel(private val repository: UserDao) : ViewModel  {
+class UserViewModel(private val repository: UserDao) : ViewModel()  {
 
     private val _uiState = MutableStateFlow<UserUIState>(UserUIState.Idle)
     val uiState: StateFlow<UserUIState> = _uiState

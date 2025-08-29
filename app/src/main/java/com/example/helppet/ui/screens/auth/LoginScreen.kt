@@ -17,13 +17,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.helppet.R
+import com.example.helppet.viewmodels.OccurrenceViewModel
 import com.example.helppet.viewmodels.UserUIState
 import com.example.helppet.viewmodels.UserViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun LoginScreen(viewModel: UserViewModel = UserViewModel(), onLoginSuccess: () -> Unit) {
-    val state by viewModel.uiState.collectAsState()
+fun LoginScreen(
+    userViewModel: UserViewModel = koinViewModel<UserViewModel>(),
+    onLoginSuccess: () -> Unit) {
+
+    val state by userViewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
 
@@ -91,7 +97,7 @@ fun LoginScreen(viewModel: UserViewModel = UserViewModel(), onLoginSuccess: () -
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = {
-                    viewModel.login(email, pass)
+                    userViewModel.login(email, pass)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

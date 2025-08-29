@@ -1,9 +1,7 @@
 package com.example.helppet.ui.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -25,14 +22,16 @@ import com.example.helppet.ui.screens.auth.LoginScreen
 import com.example.helppet.ui.screens.auth.RegisterScreen
 import com.example.helppet.viewmodels.OccurrenceViewModel
 import com.example.helppet.viewmodels.UserViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun WelcomeRootScreen() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Welcome) }
     
-    // Instancias compartilhadas dos ViewModels
-    val userViewModel = remember { UserViewModel() }
-    val occurrenceViewModel = remember { OccurrenceViewModel() }
+    // Instancias dos ViewModels via Koin
+    val userViewModel = koinViewModel<UserViewModel>()
+    val occurrenceViewModel = koinViewModel<OccurrenceViewModel>()
+
 
     when (currentScreen) {
         Screen.Welcome -> WelcomeScreen(
@@ -40,19 +39,17 @@ fun WelcomeRootScreen() {
             onRegisterClick = { currentScreen = Screen.Register }
         )
         Screen.Login -> LoginScreen(
-            viewModel = userViewModel,
+            userViewModel,
             onLoginSuccess = { currentScreen = Screen.Main }
         )
         Screen.Register -> RegisterScreen(
-            viewModel = userViewModel,
+            userViewModel,
             onRegisterSuccess = {
                 currentScreen = Screen.Main
             }
         )
         Screen.Main -> MainScreen(
-            onLogout = { currentScreen = Screen.Welcome },
-            userViewModel = userViewModel,
-            occurrenceViewModel = occurrenceViewModel
+            onLogout = { currentScreen = Screen.Welcome }
         )
     }
 }

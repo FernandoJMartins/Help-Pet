@@ -2,17 +2,18 @@ package com.example.helppet.data.repository
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import com.example.helppet.clientservice.UserDao
 import com.example.helppet.model.Occurrence
 import com.example.helppet.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class FirebaseUserDao {
+class FirebaseUserDao : UserDao{
     private val db = FirebaseFirestore.getInstance()
     private val collection = "users"
 
-    suspend fun createUser(user: User) {
+    override suspend fun createUser(user: User) {
         try {
             db.collection(collection).document(user.uid).set(user).await()
         } catch (e: Exception) {
@@ -21,7 +22,7 @@ class FirebaseUserDao {
         }
     }
 
-    suspend fun addOccurrenceToUser(user: User, occurrence: Occurrence, userState: MutableState<User?>) {
+    override suspend fun addOccurrenceToUser(user: User, occurrence: Occurrence, userState: MutableState<User?>) {
         try {
             val occurrenceMap = occurrence.toMap().toMutableMap()
 
@@ -41,7 +42,7 @@ class FirebaseUserDao {
         }
     }
 
-    suspend fun getUser(user:User): User? {
+    override suspend fun getUser(user:User): User? {
         try {
             val snapshot = db.collection(collection).document(user.uid).get().await()
             return snapshot.toObject(User::class.java)
@@ -51,7 +52,7 @@ class FirebaseUserDao {
         }
     }
 
-    suspend fun login(email: String, pass: String): Boolean {
+    override suspend fun login(email: String, pass: String): Boolean {
         return try {
             val result = db.collection(collection)
                 .whereEqualTo("email", email)

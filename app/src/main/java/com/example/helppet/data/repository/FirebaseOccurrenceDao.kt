@@ -1,15 +1,17 @@
 package com.example.helppet.data.repository
 
 import android.util.Log
+import com.example.helppet.clientservice.OccurrenceDao
+import com.example.helppet.clientservice.UserDao
 import com.example.helppet.model.Occurrence
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-class FirebaseOccurrenceDao{
+class FirebaseOccurrenceDao : OccurrenceDao{
     private val db = FirebaseFirestore.getInstance()
     private val collection = "occurrences"
 
-    suspend fun saveOccurrence(occurrence: Occurrence) {
+    override suspend fun saveOccurrence(occurrence: Occurrence) {
         try {
             occurrence.uid?.let {
                 db.collection(collection)
@@ -21,7 +23,7 @@ class FirebaseOccurrenceDao{
         }
     }
 
-    suspend fun getOccurrences(): List<Occurrence> {
+    override suspend fun getOccurrences(): List<Occurrence> {
         val snapshot = db.collection("occurrences").get().await()
         return snapshot.documents.mapNotNull { it.toObject(Occurrence::class.java) }
 

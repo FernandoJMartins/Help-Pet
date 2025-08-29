@@ -21,15 +21,15 @@ import com.example.helppet.model.User
 import com.example.helppet.viewmodels.UserViewModel
 import com.example.helppet.viewmodels.UserUIState
 import java.util.UUID
-import kotlinx.coroutines.launch
-import java.util.*
+import org.koin.androidx.compose.koinViewModel
+
 
 @Composable
 fun RegisterScreen(
-    viewModel: UserViewModel,
+    userViewModel: UserViewModel = koinViewModel<UserViewModel>(),
     onRegisterSuccess: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by userViewModel.uiState.collectAsState()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
@@ -152,7 +152,7 @@ fun RegisterScreen(
                                         occSolved = emptyList(),
                                         occCreated = emptyList()
                                     )
-                                    viewModel.createUser(newUser)
+                                    userViewModel.createUser(newUser)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

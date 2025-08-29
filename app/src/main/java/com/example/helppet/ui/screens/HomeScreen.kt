@@ -1,6 +1,5 @@
 package com.example.helppet.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,12 +35,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.helppet.model.Occurrence
 import com.example.helppet.viewmodels.OccurrenceUIState
 import com.example.helppet.viewmodels.OccurrenceViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(occurrenceViewModel: OccurrenceViewModel) {
+fun HomeScreen(    occurrenceViewModel: OccurrenceViewModel = koinViewModel<OccurrenceViewModel>()) {
     val state by occurrenceViewModel.uiState.collectAsState()
     val currentState = state // Variável local para permitir smart cast
 

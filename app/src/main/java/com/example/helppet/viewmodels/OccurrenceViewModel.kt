@@ -18,7 +18,7 @@ sealed class OccurrenceUIState {
     object Loading : OccurrenceUIState()
 }
 
-class OccurrenceViewModel(private val repository: OccurrenceDao) : ViewModel  {
+class OccurrenceViewModel(private val repository: OccurrenceDao) : ViewModel()  {
 
     private val _occurrences = MutableStateFlow<List<Occurrence>>(emptyList())
     val occurrences: StateFlow<List<Occurrence>> = _occurrences

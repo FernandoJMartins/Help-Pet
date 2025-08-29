@@ -1,6 +1,5 @@
 package com.example.helppet
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +28,7 @@ import com.example.helppet.ui.screens.ProfileScreen
 import com.example.helppet.ui.screens.WelcomeRootScreen
 import com.example.helppet.viewmodels.OccurrenceViewModel
 import com.example.helppet.viewmodels.UserViewModel
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +45,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
-    userViewModel: UserViewModel,
-    occurrenceViewModel: OccurrenceViewModel
 ) {
     var selectedItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Home) }
     val userState = remember { mutableStateOf(User.currentUser) }
@@ -62,8 +60,8 @@ fun MainScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedItem) {
-                BottomNavItem.NewReport -> NewReportScreen(userState = userState)
-                BottomNavItem.Home -> HomeScreen(occurrenceViewModel = occurrenceViewModel)
+                BottomNavItem.NewReport -> NewReportScreen()
+                BottomNavItem.Home -> HomeScreen()
                 BottomNavItem.Profile -> ProfileScreen(onLogout = onLogout, userState = userState)
             }
         }
