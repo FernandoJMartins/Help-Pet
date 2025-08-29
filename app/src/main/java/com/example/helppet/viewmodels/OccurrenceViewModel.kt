@@ -2,6 +2,7 @@ package com.example.helppet.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.helppet.clientservice.OccurrenceDao
 import com.example.helppet.data.repository.FirebaseOccurrenceDao
 import com.example.helppet.model.Occurrence
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +18,7 @@ sealed class OccurrenceUIState {
     object Loading : OccurrenceUIState()
 }
 
-class OccurrenceViewModel : ViewModel()  {
-    private val repository = FirebaseOccurrenceDao()
+class OccurrenceViewModel(private val repository: OccurrenceDao) : ViewModel  {
 
     private val _occurrences = MutableStateFlow<List<Occurrence>>(emptyList())
     val occurrences: StateFlow<List<Occurrence>> = _occurrences

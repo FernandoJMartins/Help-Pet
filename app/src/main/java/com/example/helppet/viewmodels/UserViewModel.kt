@@ -18,8 +18,7 @@ sealed class UserUIState {
     object Loading : UserUIState()
 }
 
-class UserViewModel : ViewModel()  {
-    private val repository = FirebaseUserDao()
+class UserViewModel(private val repository: UserDao) : ViewModel  {
 
     private val _uiState = MutableStateFlow<UserUIState>(UserUIState.Idle)
     val uiState: StateFlow<UserUIState> = _uiState
